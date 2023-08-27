@@ -28,18 +28,37 @@ function App() {
     toggleList(!showList);
   };
 
-  const onUserNameUpdate = useCallback((userId, newName) => {
-    setUsers((users) => {
-      const newUsersList = [...users];
-      const index = newUsersList.findIndex((user) => user.id === userId);
-      const userToUpdate = {
-        ...newUsersList[index],
-      };
-      userToUpdate.name = newName;
-      newUsersList[index] = userToUpdate;
-      return newUsersList;
-    });
+  // const onUserNameUpdate = useCallback((userId, newName) => {
+  //   setUsers((users) => {
+  //     const newUsersList = [...users];
+  //     const index = newUsersList.findIndex((user) => user.id === userId);
+  //     const userToUpdate = {
+  //       ...newUsersList[index],
+  //     };
+  //     userToUpdate.name = newName;
+  //     newUsersList[index] = userToUpdate;
+  //     return newUsersList;
+  //   });
+  // }, []);
+
+  const onUserNameUpdate = useMemo(() => {
+    return (userId, newName) => {
+      setUsers((users) => {
+        const newUsersList = [...users];
+        const index = newUsersList.findIndex((user) => user.id === userId);
+        const userToUpdate = {
+          ...newUsersList[index],
+        };
+        userToUpdate.name = newName;
+        newUsersList[index] = userToUpdate;
+        return newUsersList;
+      });
+    };
   }, []);
+
+  const userList = useMemo(() => {
+    return <UserList onUserNameUpdate={onUserNameUpdate} users={users} />;
+  }, [onUserNameUpdate, users]);
 
   return (
     <div>
@@ -57,9 +76,7 @@ function App() {
       <button onClick={handleToggleList}>Toggle List</button>
 
       <hr />
-      {showList && (
-        <UserList onUserNameUpdate={onUserNameUpdate} users={users} />
-      )}
+      {showList && userList}
     </div>
   );
 }
