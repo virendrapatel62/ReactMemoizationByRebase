@@ -1,39 +1,14 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import axios from "axios";
-
+import UserList from "./components/UserList";
 const GET_USER_URL = "https://jsonplaceholder.typicode.com/users";
-
-function User(props) {
-  const user = props.user;
-  console.log("Render User", user.id);
-  return (
-    <tr>
-      <td>{user.id}</td>
-      <td>{user.name}</td>
-    </tr>
-  );
-}
-function UserList(props) {
-  console.log("Render UserList", props.users);
-
-  const users = props.users;
-
-  return (
-    <table>
-      <tbody>
-        {users.map((user) => (
-          <User key={user.id} user={user} />
-        ))}
-      </tbody>
-    </table>
-  );
-}
 
 function App() {
   const [users, setUsers] = useState([]);
+  const [count, setCount] = useState(0);
   const [showList, toggleList] = useState(true);
 
-  console.log("Render App", users);
+  console.log("Render App");
 
   useEffect(() => {
     axios.get(GET_USER_URL).then((response) => {
@@ -53,14 +28,38 @@ function App() {
     toggleList(!showList);
   };
 
+  const onUserNameUpdate = useCallback((userId, newName) => {
+    setUsers((users) => {
+      const newUsersList = [...users];
+      const index = newUsersList.findIndex((user) => user.id === userId);
+      const userToUpdate = {
+        ...newUsersList[index],
+      };
+      userToUpdate.name = newName;
+      newUsersList[index] = userToUpdate;
+      return newUsersList;
+    });
+  }, []);
+
   return (
     <div>
       <h1>Users</h1>
+
+      <h1
+        onClick={() => {
+          setCount(count + 1);
+        }}
+      >
+        Count : {count}
+      </h1>
+
       <h1>Sum of ids : {sumOfIds}</h1>
       <button onClick={handleToggleList}>Toggle List</button>
 
       <hr />
-      {showList && <UserList users={users} />}
+      {showList && (
+        <UserList onUserNameUpdate={onUserNameUpdate} users={users} />
+      )}
     </div>
   );
 }
